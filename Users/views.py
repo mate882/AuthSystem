@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect
-from .forms import RegisterForm
+from .forms import RegisterForm, LoginForm
 from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
@@ -8,16 +8,22 @@ from django.template.loader import render_to_string
 from django.contrib.sites.shortcuts import get_current_site
 from django.core.mail import EmailMessage
 from django.contrib.auth.tokens import default_token_generator
+from django.contrib.auth import login, logout, authenticate
 
 User = get_user_model()
 
 
 def register(request):
+    if request.user.is_authenticated:
+        return redirect('profile')
+
+    if request.user.is_authenticated and request.user.is_verified:
+        return redirect('profile')
+
     if request.method == 'POST':
         form = RegisterForm(request.POST)
         email = request.POST.get('email')
 
-        # Check if email already used
         if User.objects.filter(email=email).exists():
             messages.error(request, "❌ Email already in use.")
             return render(request, 'main/register.html', {'form': form})
@@ -27,7 +33,6 @@ def register(request):
             user.is_active = False
             user.save()
 
-            # Send verification email
             current_site = get_current_site(request)
             mail_subject = 'Activate your account.'
             uid = urlsafe_base64_encode(force_bytes(user.pk))
@@ -42,7 +47,7 @@ def register(request):
             email_message = EmailMessage(mail_subject, message, to=[email])
             email_message.send()
 
-            messages.success(request, "✅ Please confirm your email address to complete registration.")
+            messages.success(request, "✅ Please Check your email address to complete registration.")
             return redirect('register')
 
         else:
@@ -53,7 +58,32 @@ def register(request):
     return render(request, 'main/register.html', {'form': form})
 
 
-from django.contrib.auth import login
+def user_login(request):
+    if request.user.is_authenticated:
+        return redirect('profile')
+
+    if request.method == 'POST':
+        form = LoginForm(request.POST)
+        if form.is_valid():
+            email = form.cleaned_data['email']
+            password = form.cleaned_data['password']
+            user = authenticate(request, email=email, password=password)
+
+            if user is not None:
+                login(request, user)
+                return redirect('profile')
+            else:
+                form.add_error(None, 'Invalid Email or password')
+    else:
+        form = LoginForm()
+
+    return render(request, 'main/login.html', {'form': form})
+
+
+def user_logout(request):
+    logout(request)
+    return redirect('login')
+
 
 
 def activate(request, uidb64, token):
@@ -73,12 +103,13 @@ def activate(request, uidb64, token):
         messages.error(request, "Activation link is invalid!")
         return redirect('register')
 
+
 def profile(request):
-    if not request.user.is_verified:
-        messages.warning(request, "⚠️ Please verify your email to access the profile.")
-        return redirect('profile')
+    if not request.user.is_authenticated:
+        return redirect('register')
 
     return render(request, 'main/profile.html', {'user': request.user})
 
-def user_login(request):
-    return render(request, 'main/login.html')
+
+def home(request):
+    return render(request, 'main/home.html')
