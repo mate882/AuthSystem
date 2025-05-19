@@ -31,6 +31,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'Users',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -39,7 +40,6 @@ INSTALLED_APPS = [
     'crispy_forms',
     'crispy_bootstrap4',
     'django.contrib.staticfiles',
-    'Users',
 ]
 
 MIDDLEWARE = [
@@ -138,3 +138,9 @@ EMAIL_HOST_USER = 'mateasanidze808@gmail.com'
 EMAIL_HOST_PASSWORD = 'uvtf dkuw iiik wxsy'
 
 AUTH_USER_MODEL = 'Users.CustomUser'
+
+USERNAME_FIELD = 'email'
+
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',
+]
