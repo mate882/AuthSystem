@@ -9,6 +9,7 @@ from django.contrib.sites.shortcuts import get_current_site
 from django.core.mail import EmailMessage
 from django.contrib.auth.tokens import default_token_generator
 from django.contrib.auth import login, logout, authenticate
+from django.contrib.auth.decorators import login_required
 
 User = get_user_model()
 
@@ -108,8 +109,24 @@ def profile(request):
     if not request.user.is_authenticated:
         return redirect('register')
 
+    if request.method == 'POST':
+        user = request.user
+        profile_pic = request.FILES.get('profile_pic')
+        if profile_pic:
+            user.profile_pic = profile_pic
+            user.save()
+
     return render(request, 'main/profile.html', {'user': request.user})
 
 
 def home(request):
     return render(request, 'main/home.html')
+
+@login_required
+def delete_profile_pic(request):
+    user = request.user
+    if user.profile_pic:
+        user.profile_pic.delete(save=False)
+        user.profile_pic = None
+        user.save()
+    return redirect('profile')

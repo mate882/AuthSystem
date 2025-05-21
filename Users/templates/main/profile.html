@@ -3,7 +3,11 @@
 <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
 
 <div class="container mt-5">
-  <div class="d-flex flex-column align-items-start gap-4 ms-8" style="margin-left: 150px; max-width: 400px;">
+  <div class="d-flex flex-column align-items-start gap-4 ms-8" style="margin-left: 250px; max-width: 400px;">
+    <div class="card p-3 shadow-sm w-100">
+      <strong>ID</strong>
+      <p class="text-primary mb-0">{{ user.id }}</p>
+    </div>
 
     <div class="card p-3 shadow-sm w-100">
       <strong>Date of Joining:</strong>
@@ -15,29 +19,36 @@
       <p class="text-primary mb-0">{{ user.email }}</p>
     </div>
 
-    <div class="card p-3 shadow-sm w-100">
-      <strong>First Name:</strong>
-      <p class="text-primary mb-0">{{ user.first_name }}</p>
-    </div>
+    <form method="POST" enctype="multipart/form-data">
+      {% csrf_token %}
 
-    <div class="card p-3 shadow-sm w-100">
-      <strong>Last Name:</strong>
-      <p class="text-primary mb-0">{{ user.last_name }}</p>
-    </div>
+      <input type="file" id="profileInput" name="profile_pic" accept="image/*" style="display: none;">
 
-    <div class="card p-3 shadow-sm w-100">
-      <strong>Status:</strong>
-      {% if user.status == 'Admin' %}
-        <span class="d-inline-block rounded-circle" style="width: 20px; height: 20px; background-color: #800000;"></span>
-      {% elif user.status == 'Moderator' %}
-        <span class="d-inline-block rounded-circle bg-warning" style="width: 20px; height: 20px;"></span>
-      {% elif user.status == 'User' %}
-        <span class="d-inline-block rounded-circle bg-dark" style="width: 20px; height: 20px;"></span>
-      {% endif %}
-      <p class="text-primary mb-0">{{ user.status }}</p>
-    </div>
+      <label for="profileInput" style="cursor: pointer; display: inline-block;">
+        {% if request.user.profile_pic %}
+          <img src="{{ request.user.profile_pic.url }}" class="img-thumbnail rounded-circle shadow" 
+              style="width: 200px; height: 200px; object-fit: cover; transform: translate(-270px, -300px);" alt="Profile Picture">
+        {% else %}
+          <img src="{% static 'images/default-avatar.png' %}" class="img-thumbnail rounded-circle shadow" 
+              style="width: 200px; height: 200px; object-fit: cover; transform: translate(-270px, -300px);" alt="Default Picture">
+        {% endif %}
+      </label>
 
-    <a href="{% url 'logout' %}" class="btn btn-success">Logout</a>
+      <button type="submit" class="btn btn-primary mt-2" 
+        style="transform: translate(-360px, -155px);">Upload
+      </button>
+    </form>
 
-  </div>
+    <form method="POST" action="{% url 'delete_profile_pic' %}">
+      {% csrf_token %}
+      <button type="submit" class="btn btn-danger mt-2" 
+          style="transform: translate(-290px, -320px);"
+          onclick="return confirm('Are you sure you want to delete your profile picture?');"
+          {% if not request.user.profile_pic %} disabled {% endif %}>
+        Delete Picture
+      </button>
+    </form>
+
+
+  <a class="btn btn-outline-danger me-3" style="transform: translate(-250px, -50px);" href="{% url 'logout' %}">Logout</a>
 </div>
