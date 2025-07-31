@@ -21,23 +21,23 @@
 
     <form method="POST" enctype="multipart/form-data">
       {% csrf_token %}
-
-      <input type="file" id="profileInput" name="profile_pic" accept="image/*" style="display: none;">
+      
+      <input type="file" id="profileInput" name="profile_pic" accept="image/*" 
+            style="display: none;" onchange="this.form.submit()">
 
       <label for="profileInput" style="cursor: pointer; display: inline-block;">
-        {% if request.user.profile_pic %}
-          <img src="{{ request.user.profile_pic.url }}" class="img-thumbnail rounded-circle shadow" 
-              style="width: 200px; height: 200px; object-fit: cover; transform: translate(-270px, -300px);" alt="Profile Picture">
-        {% else %}
-          <img src="{% static 'images/default-avatar.png' %}" class="img-thumbnail rounded-circle shadow" 
-              style="width: 200px; height: 200px; object-fit: cover; transform: translate(-270px, -300px);" alt="Default Picture">
-        {% endif %}
+          {% if request.user.profile_pic %}
+              <img src="{{ request.user.profile_pic.url }}" class="img-thumbnail rounded-circle shadow" 
+                  style="width: 200px; height: 200px; object-fit: cover; transform: translate(-270px, -300px);" 
+                  alt="Profile Picture">
+          {% else %}
+              <img src="{% static 'images/default-avatar.png' %}" class="img-thumbnail rounded-circle shadow" 
+                  style="width: 200px; height: 200px; object-fit: cover; transform: translate(-270px, -300px);" 
+                  alt="Default Picture">
+          {% endif %}
       </label>
+  </form>
 
-      <button type="submit" class="btn btn-primary mt-2" 
-        style="transform: translate(-360px, -155px);">Upload
-      </button>
-    </form>
 
     <form method="POST" action="{% url 'delete_profile_pic' %}">
       {% csrf_token %}
